@@ -85,13 +85,13 @@ const SkipSize = ({
                 />
                 <CardMedia
                   component="img"
+                  height={220}
                   image={`/images/${
                     skipOption.size > 4 && skipOption.size < 14
                       ? "5_6_8_10_12"
                       : skipOption.size
                   }_yard_skip.jpg`}
                   alt={skipOption.size + " Yard Skip"}
-                  sx={{ height: { xs: 180, sm: 220 } }}
                 />
                 {!skipOption.allowed_on_road && (
                   <Alert
