@@ -6,21 +6,22 @@ import {
   Scripts,
   ScrollRestoration,
 } from "react-router";
-
+import { ThemeProvider } from "@mui/material/styles";
 import type { Route } from "./+types/root";
+import "@fontsource/inter/300.css";
+import "@fontsource/inter/400.css";
+import "@fontsource/inter/500.css";
+import "@fontsource/inter/700.css";
+import theme from "./utils/theme";
+import CssBaseline from "@mui/material/CssBaseline";
 import "./app.css";
 
 export const links: Route.LinksFunction = () => [
-  { rel: "preconnect", href: "https://fonts.googleapis.com" },
-  {
-    rel: "preconnect",
-    href: "https://fonts.gstatic.com",
-    crossOrigin: "anonymous",
-  },
-  {
-    rel: "stylesheet",
-    href: "https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap",
-  },
+  // {
+  //   rel: "preload",
+  //   as: "image",
+  //   href: "/images/4_yard_skip.jpg",
+  // },
 ];
 
 export function Layout({ children }: { children: React.ReactNode }) {
@@ -42,7 +43,12 @@ export function Layout({ children }: { children: React.ReactNode }) {
 }
 
 export default function App() {
-  return <Outlet />;
+  return (
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <Outlet />
+    </ThemeProvider>
+  );
 }
 
 export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
