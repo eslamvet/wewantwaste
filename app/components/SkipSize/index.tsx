@@ -1,6 +1,5 @@
 import {
   Alert,
-  alpha,
   Box,
   Button,
   Card,
@@ -15,13 +14,28 @@ import {
   ListItemText,
   Stack,
   Typography,
-  useTheme,
 } from "@mui/material";
 import LocalShippingIcon from "@mui/icons-material/LocalShipping";
 import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
 import CheckIcon from "@mui/icons-material/Check";
 import PaymentsIcon from "@mui/icons-material/Payments";
 import type { SkipOption } from "~/types/skip-option";
+import { memo, useCallback, type MouseEventHandler } from "react";
+import styles from "./style";
+
+const skipItemsSlotProps: any = {
+  size: {
+    primary: { variant: "body1", fontWeight: 600 },
+  },
+  period: {
+    primary: { variant: "body2" },
+  },
+  price: {
+    primary: {
+      variant: "h6",
+    },
+  },
+};
 
 const SkipSize = ({
   skipOptions,
@@ -32,10 +46,25 @@ const SkipSize = ({
   selectedSkipSize: SkipOption | null;
   setSelectedSkipSize: React.Dispatch<React.SetStateAction<SkipOption | null>>;
 }) => {
-  const theme = useTheme();
+  const cardClickHandler = useCallback<MouseEventHandler<HTMLDivElement>>(
+    (ev) => {
+      ev.stopPropagation();
+      const skipId = parseInt(ev.currentTarget.getAttribute("data-id") || "0");
+      if (skipId) {
+        const selectedSkip = skipOptions.find((s) => s.id == skipId) ?? null;
+        localStorage.setItem(
+          "selected-skip-size",
+          JSON.stringify(selectedSkip)
+        );
+        setSelectedSkipSize(selectedSkip);
+      }
+    },
+    [skipOptions]
+  );
+
   return (
-    <Box sx={{ py: 5, textAlign: "center" }}>
-      <Stack sx={{ mb: 5, gap: 1 }}>
+    <Box sx={styles.container}>
+      <Stack sx={styles.headerContainer}>
         <Typography variant="h5" color="primary.contrastText" fontWeight={600}>
           Choose Your Skip Size
         </Typography>
@@ -43,44 +72,22 @@ const SkipSize = ({
           Select the skip size that best suits your needs
         </Typography>
       </Stack>
-      <Grid container spacing={3} columns={{ xs: 4, sm: 12 }}>
-        {skipOptions.map((skipOption, index) => (
+      <Grid container spacing={3} columns={styles.contentContainer}>
+        {skipOptions?.map((skipOption) => (
           <Grid key={skipOption.id} size={4}>
             <Card
               raised
-              onClick={() => {
-                localStorage.setItem(
-                  "selected-skip-size",
-                  JSON.stringify(skipOption)
-                );
-                setSelectedSkipSize(skipOption);
-              }}
+              data-id={skipOption.id}
+              onClick={cardClickHandler}
               data-active={
                 selectedSkipSize?.id === skipOption.id ? "" : undefined
               }
-              sx={{
-                cursor: "pointer",
-                overflow: "hidden",
-                borderRadius: 2.5,
-                border: "2px solid",
-                borderColor: "divider",
-                "&[data-active]": {
-                  borderColor: "primary.main",
-                },
-                "&:hover:not([data-active])": {
-                  borderColor: alpha(theme.palette.primary.main, 0.5),
-                },
-              }}
+              sx={styles.card}
             >
-              <Stack sx={{ position: "relative" }}>
+              <Stack sx={styles.cardHeader}>
                 <Chip
                   label={skipOption.size + " Yards"}
-                  sx={{
-                    position: "absolute",
-                    top: 10,
-                    right: 10,
-                    fontWeight: 500,
-                  }}
+                  sx={styles.cardBadge}
                   color="primary"
                 />
                 <CardMedia
@@ -94,64 +101,38 @@ const SkipSize = ({
                   alt={skipOption.size + " Yard Skip"}
                 />
                 {!skipOption.allowed_on_road && (
-                  <Alert
-                    severity="warning"
-                    sx={{
-                      position: "absolute",
-                      bottom: 10,
-                      left: 10,
-                      right: 10,
-                      py: 0,
-                      px: 1,
-                      width: "fit-content",
-                      maxWidth: "90%",
-                      color: "warning.main",
-                      fontSize: 12,
-                      alignItems: "center",
-                      "& .MuiAlert-icon": {
-                        fontSize: 18,
-                      },
-                    }}
-                  >
+                  <Alert severity="warning" sx={styles.cardAlert}>
                     Not Allowed On The Road
                   </Alert>
                 )}
               </Stack>
-              <CardContent sx={{ textAlign: "start" }}>
-                <List sx={{ py: 0 }}>
-                  <ListItem disableGutters sx={{ gap: 1 }}>
-                    <ListItemIcon sx={{ minWidth: "unset" }}>
-                      <LocalShippingIcon sx={{ color: "text.primary" }} />
+              <CardContent sx={styles.cardContent}>
+                <List sx={styles.cardContentList}>
+                  <ListItem disableGutters sx={styles.cardContentListItem}>
+                    <ListItemIcon sx={styles.cardContentListItemIconWrapper}>
+                      <LocalShippingIcon sx={styles.cardContentListItemIcon} />
                     </ListItemIcon>
                     <ListItemText
                       primary={skipOption.size + " Yard Skip"}
-                      slotProps={{
-                        primary: { variant: "body1", fontWeight: 600 },
-                      }}
+                      slotProps={skipItemsSlotProps.size}
                     />
                   </ListItem>
-                  <ListItem disableGutters sx={{ gap: 1 }}>
-                    <ListItemIcon sx={{ minWidth: "unset" }}>
-                      <CalendarMonthIcon sx={{ color: "text.primary" }} />
+                  <ListItem disableGutters sx={styles.cardContentListItem}>
+                    <ListItemIcon sx={styles.cardContentListItemIconWrapper}>
+                      <CalendarMonthIcon sx={styles.cardContentListItemIcon} />
                     </ListItemIcon>
                     <ListItemText
                       primary={skipOption.hire_period_days + " day hire period"}
-                      slotProps={{
-                        primary: { variant: "body2" },
-                      }}
+                      slotProps={skipItemsSlotProps.period}
                     />
                   </ListItem>
-                  <ListItem disableGutters sx={{ gap: 1 }}>
-                    <ListItemIcon sx={{ minWidth: "unset" }}>
-                      <PaymentsIcon sx={{ color: "text.primary" }} />
+                  <ListItem disableGutters sx={styles.cardContentListItem}>
+                    <ListItemIcon sx={styles.cardContentListItemIconWrapper}>
+                      <PaymentsIcon sx={styles.cardContentListItemIcon} />
                     </ListItemIcon>
                     <ListItemText
                       primary={"£" + skipOption.price_before_vat}
-                      slotProps={{
-                        primary: {
-                          variant: "h6",
-                        },
-                      }}
+                      slotProps={skipItemsSlotProps.price}
                     />
                   </ListItem>
                 </List>
@@ -169,7 +150,7 @@ const SkipSize = ({
                   startIcon={
                     selectedSkipSize?.id === skipOption.id && <CheckIcon />
                   }
-                  sx={{ flex: 1 }}
+                  sx={styles.cardActionBtn}
                 >
                   {selectedSkipSize?.id === skipOption.id
                     ? "Selected"
@@ -184,4 +165,4 @@ const SkipSize = ({
   );
 };
 
-export default SkipSize;
+export default memo(SkipSize);

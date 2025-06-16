@@ -2,18 +2,18 @@ import {
   Container,
   Stepper,
   StepConnector,
-  stepConnectorClasses,
   Step,
   StepButton,
   Typography,
 } from "@mui/material";
 import { Fragment } from "react/jsx-runtime";
-import SkipSize from "~/components/SkipSize";
+import SkipSize from "~/components/SkipSize/";
 import { HomeSteps } from "~/utils/constants";
-import type { Route } from "./+types/home";
-import { useEffect, useState } from "react";
+import type { Route } from "../../+types/root";
+import { useEffect, useMemo, useState } from "react";
 import type { SkipOption } from "~/types/skip-option";
 import BottomSheet from "~/components/BottomSheet";
+import styles from "./style";
 
 export async function loader() {
   const skipOptionsRes = await fetch(
@@ -46,35 +46,25 @@ export default function Home({
       JSON.parse(localStorage.getItem("selected-skip-size") ?? "null")
     );
   }, []);
+
+  const customStyles = useMemo(
+    () => styles(selectedSkipSize),
+    [selectedSkipSize]
+  );
+
   return (
-    <Container
-      maxWidth="lg"
-      sx={{
-        pt: 4,
-        pb: { xs: selectedSkipSize ? 25 : 4, sm: selectedSkipSize ? 15 : 4 },
-      }}
-    >
+    <Container maxWidth="lg" sx={customStyles.container}>
       <Stepper
         activeStep={activeStep}
-        sx={{ flexWrap: "wrap", gap: { xs: 2, sm: 0 } }}
-        connector={
-          <StepConnector
-            sx={{
-              [`&.${stepConnectorClasses.completed}`]: {
-                [`& .${stepConnectorClasses.line}`]: {
-                  borderColor: "primary.main",
-                },
-              },
-            }}
-          />
-        }
+        sx={customStyles.stepper}
+        connector={<StepConnector sx={customStyles.stepperConnector} />}
       >
         {HomeSteps.map(({ label, icon: StepIcon }, index) => {
           return (
             <Step
               key={label}
               completed={index <= activeStep}
-              sx={{ flex: { xs: 1, sm: "unset" } }}
+              sx={customStyles.step}
             >
               <StepButton
                 icon={
@@ -85,10 +75,7 @@ export default function Home({
               >
                 <Typography
                   variant="body1"
-                  sx={{
-                    fontWeight: 600,
-                    fontSize: { xs: ".85rem", sm: "1.25rem" },
-                  }}
+                  sx={customStyles.stepBtnText}
                   color={index <= activeStep ? "text.primary" : "text.disabled"}
                 >
                   {label}
@@ -108,7 +95,7 @@ export default function Home({
         <Fragment>
           {activeStep == 2 && (
             <SkipSize
-              skipOptions={skipOptions}
+              skipOptions={skipOptions!}
               selectedSkipSize={selectedSkipSize}
               setSelectedSkipSize={setSelectedSkipSize}
             />
